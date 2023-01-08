@@ -1,0 +1,12 @@
+*~
+lib/
+cmake-*
+data/*
+.idea/*
+.vscode/*
+CameraTrajectory.txt
+KeyFrameTrajectory.txt
+tmp
+build/
+Vocabulary/*
+
