@@ -292,6 +292,7 @@ void Tracking::Track()
     {
         if(mSensor==System::STEREO || mSensor==System::RGBD)
             StereoInitialization();
+        //==============================================230110==============================================
         else
             MonocularInitialization();
 

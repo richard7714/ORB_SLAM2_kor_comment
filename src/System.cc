@@ -29,6 +29,7 @@ namespace ORB_SLAM2
 
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
                const bool bUseViewer)
+               // pointer는 무조건 비워놓는게 좋다 => NULL로 초기화!
                :mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false),mbActivateLocalizationMode(false),
         mbDeactivateLocalizationMode(false)
         /**
@@ -124,6 +125,7 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
     if(mSensor!=STEREO)
     {
         cerr << "ERROR: you called TrackStereo but input sensor was not set to STEREO." << endl;
+        // return과 다른점?? => main이 종료됨
         exit(-1);
     }   
 
@@ -160,7 +162,7 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
             mbDeactivateLocalizationMode = false;
         }
     }
-
+//==================================230109==================================
     // Check reset
     {
     unique_lock<mutex> lock(mMutexReset);

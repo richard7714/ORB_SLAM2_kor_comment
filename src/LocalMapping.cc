@@ -563,6 +563,7 @@ void LocalMapping::RequestStop()
     unique_lock<mutex> lock(mMutexStop);
     // stop request관련 flag를 true로
     mbStopRequested = true;
+    // Todo mbAbortBA가 하는 역할?
     // New KF 생성 관련 critical section 접근 제한
     unique_lock<mutex> lock2(mMutexNewKFs);
     // BA 중지 flag true
@@ -601,6 +602,7 @@ void LocalMapping::Release()
     /**
      * Todo
      * ? mbFinished가 true이면 종료?
+     * * ㅇㅇ
      */
     if(mbFinished)
         return;
@@ -609,6 +611,8 @@ void LocalMapping::Release()
     mbStopped = false;
     mbStopRequested = false;
 
+    // Todo
+    // begin() => 포인터임
     for(list<KeyFrame *>::iterator lit = mlNewKeyFrames.begin(),
             lend=mlNewKeyFrames.end(); lit!=lend; lit++)
         // 실제 변수가 저장 되어 있는 메모리를 지운다

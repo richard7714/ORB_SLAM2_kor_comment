@@ -41,6 +41,11 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
 
 int main(int argc, char **argv)
 // argc : argument 갯수, argv : argument 값
+/**
+ * Todo
+ * ! 이중 배열은 이중 포인터, 삼중 배열은 삼중 포인터로 사용할 수 있다.
+ * * argv 포인터 하나는 문자 배열 포인터 하나나
+ */
 {
     if(argc != 4)
     // argument 갯수가 4개가 아닐 경우
@@ -54,7 +59,7 @@ int main(int argc, char **argv)
     vector<string> vstrImageLeft;
     // 우안 이미지 path
     vector<string> vstrImageRight;
-    // 이미지의 timestamp(파일이름)
+    // 이미지의 timestamp
     vector<double> vTimestamps;
 
     LoadImages(string(argv[3]) // 이미지 sequence 경로
@@ -100,6 +105,7 @@ int main(int argc, char **argv)
     for(int ni=0; ni<nImages; ni++)
     {
         // Read left and right images from file
+        // 3channel grayscale을 가져올 위험 존재
         imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
         imRight = cv::imread(vstrImageRight[ni],CV_LOAD_IMAGE_UNCHANGED);
         double tframe = vTimestamps[ni];
@@ -111,6 +117,7 @@ int main(int argc, char **argv)
             return 1;
         }
 
+        // CMakelist에서 정의함
 #ifdef COMPILEDWITHC11
         std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 #else
@@ -168,10 +175,13 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
     ifstream fTimes;
     // sequence 파일 경로
     string strPathTimeFile = strPathToSequence + "/times.txt";
-    // open은 char*를 매개변수로 받기 때문에, c_str를 통해 string을 char*로 변환해준다.
+    // open은 const char*를 매개변수로 받기 때문에, c_str를 통해 string을 const char*로 변환해준다.
     fTimes.open(strPathTimeFile.c_str());
     
     // fTimes가 끝날때 까지
+    /**
+     * ! eof()는 불안정함. txt 끝에 공백 몇개 더 입력된다면 오류 발생
+     */
     while(!fTimes.eof())
     {
         string s;
@@ -183,13 +193,14 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
             /**
              * ! stringstream : 주어진 문자열에서 필요한 자료형에 맞는 정보를 꺼낼 때 유용하게 사용
              * ? 왜 사용?
-             * Todo
+             * Todo 자료형에 맞는 것만 뽑아낸다?? 확인!
              * * e+0x 형태로 입력된 string을 소숫점 형태로 변환해서 제공함
              */
             stringstream ss;
             ss << s;
             double t;
             ss >> t;
+
             // timestamp의 double 형 기록
             vTimestamps.push_back(t);
         }
@@ -199,6 +210,14 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
     string strPrefixRight = strPathToSequence + "/image_1/";
 
     const int nTimes = vTimestamps.size();
+
+    /**
+     * ! resize vs reserve
+     * * reserve는 초기화 없이 크기만 할당 resize는 초기화까지!
+     * ? 왜 해야하는가?
+     * * 메모리 절약 + 시간 복잡도 감소
+     */
+
     vstrImageLeft.resize(nTimes);
     vstrImageRight.resize(nTimes);
 
@@ -206,6 +225,7 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
     {
         stringstream ss;
         // 000000의 형태로 파일들이 index 되도록 설정
+        // ! setw(6) => 6자리로 출력해라!
         ss << setfill('0') << setw(6) << i;
         vstrImageLeft[i] = strPrefixLeft + ss.str() + ".png";
         vstrImageRight[i] = strPrefixRight + ss.str() + ".png";
